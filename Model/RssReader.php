@@ -52,13 +52,16 @@ class RssReader extends RssReadersAppModel {
 	);
 
 /**
- * get rss_reader
+ * Get rss reader
  *
  * @param int $blockId blocks.id
- * @param bool $editable false:publish latest rssreader|true:all latest rssreader
+ * @param bool $contentEditable true can edit the content, false not can edit the content.
  * @return array $rssReader
  */
-	public function getContent($blockId, $editable = 0) {
+	public function getRssReader($blockId, $contentEditable) {
+
+
+
 //		$conditions = array(
 //			'block_id' => $blockId
 //		);
