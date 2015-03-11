@@ -3,7 +3,9 @@
  * RssReaders Controller
  *
  * @property RssReader $RssReader
+ *
  * @author Kosuke Miura <k_miura@zenk.co.jp>
+ * @author Shohei Nakajima <nakajimashouhei@gmail.com>
  * @link http://www.netcommons.org NetCommons Project
  * @license http://www.netcommons.org/license.txt NetCommons License
  * @copyright Copyright 2014, NetCommons Project
@@ -15,8 +17,9 @@ App::uses('RssReadersAppController', 'RssReaders.Controller');
 /**
  * RssReaders Controller
  *
- * @author  Kosuke Miura <k_miura@zenk.co.jp>
- * @package app\Plugin\RssReaders\Controller
+ * @author Kosuke Miura <k_miura@zenk.co.jp>
+ * @author Shohei Nakajima <nakajimashouhei@gmail.com>
+ * @package NetCommons\RssReaders\Controller
  */
 class RssReadersController extends RssReadersAppController {
 
@@ -26,7 +29,8 @@ class RssReadersController extends RssReadersAppController {
  * @var    array
  */
 	public $uses = array(
-		'Frames.Frame',
+		//'Frames.Frame',
+		'Comments.Comment',
 		'RssReaders.RssReader',
 		'RssReaders.RssReaderFrameSetting'
 	);
@@ -37,9 +41,15 @@ class RssReadersController extends RssReadersAppController {
  * @var array
  */
 	public $components = array(
-		'NetCommons.NetCommonsBlock',
+		//'NetCommons.NetCommonsBlock',
 		'NetCommons.NetCommonsFrame',
-		'NetCommons.NetCommonsRoomRole'
+		'NetCommons.NetCommonsWorkflow',
+		'NetCommons.NetCommonsRoomRole' => array(
+			//コンテンツの権限設定
+			'allowedActions' => array(
+				'contentEditable' => array('edit')
+			),
+		),
 	);
 
 /**
@@ -47,73 +57,67 @@ class RssReadersController extends RssReadersAppController {
  *
  * @var array
  */
-	public $helpers = array('RssReaders.RssReader');
-
-/**
- * beforeFilter
- *
- * @return void
- * @throws ForbiddenException
- */
-	public function beforeFilter() {
-		parent::beforeFilter();
-		$this->Auth->allow();
-
-		// Roleのデータをviewにセット
-		if (!$this->NetCommonsRoomRole->setView($this)) {
-			throw new ForbiddenException();
-		}
-	}
+	public $helpers = array(
+		'NetCommons.Token'
+		//'RssReaders.RssReader'
+	);
 
 /**
  * index
  *
- * @param int $frameId frames.id
  * @return CakeResponse
  */
-	public function index($frameId = 0) {
-		return $this->view($frameId);
+	public function index() {
+		$this->view = 'RssReaders/view';
+		$this->view();
 	}
 
 /**
  * view
  *
- * @param int $frameId frames.id
- * @return CakeResponse
- * @throws ForbiddenException
+ * @return void
  */
-	public function view($frameId = 0) {
-		// Frameのデータをviewにセット
-		if (!$this->NetCommonsFrame->setView($this, $frameId)) {
-			throw new ForbiddenException('NetCommonsFrame');
-		}
+	public function view() {
+//		// Frameのデータをviewにセット
+//		if (!$this->NetCommonsFrame->setView($this, $frameId)) {
+//			throw new ForbiddenException('NetCommonsFrame');
+//		}
+//
+//		// RssReaderの取得
+//		$rssReaderData = $this->RssReader->getContent(
+//			$this->viewVars['blockId'],
+//			$this->viewVars['contentEditable']
+//		);
+//
+//		$rssXmlData = array();
+//		if (!empty($rssReaderData)) {
+//			// シリアライズされているRSSのデータを配列に戻す
+//			$rssSerializeData = $this->RssReader->updateSerializeValue($rssReaderData);
+//			$rssXmlData = unserialize($rssSerializeData);
+//		}
+//		$this->set('rssReaderData', $rssReaderData);
+//		$this->set('rssXmlData', $rssXmlData);
+//
+//		// RssReaderFrameSettingの取得
+//		$rssReaderFrameData =
+//			$this->RssReaderFrameSetting->getRssReaderFrameSetting($this->viewVars['frameKey']);
+//		// RssReaderFrameSettingが存在しない場合は初期化する
+//		if (empty($rssReaderFrameData)) {
+//			$rssReaderFrameData =
+//				$this->RssReaderFrameSetting->createRssReaderFrameSetting($this->viewVars['frameKey']);
+//		}
+//		$this->set('rssReaderFrameSettingData', $rssReaderFrameData);
+//
+//		return $this->render('RssReaders/view');
+	}
 
-		// RssReaderの取得
-		$rssReaderData = $this->RssReader->getContent(
-			$this->viewVars['blockId'],
-			$this->viewVars['contentEditable']
-		);
-
-		$rssXmlData = array();
-		if (!empty($rssReaderData)) {
-			// シリアライズされているRSSのデータを配列に戻す
-			$rssSerializeData = $this->RssReader->updateSerializeValue($rssReaderData);
-			$rssXmlData = unserialize($rssSerializeData);
-		}
-		$this->set('rssReaderData', $rssReaderData);
-		$this->set('rssXmlData', $rssXmlData);
-
-		// RssReaderFrameSettingの取得
-		$rssReaderFrameData =
-			$this->RssReaderFrameSetting->getRssReaderFrameSetting($this->viewVars['frameKey']);
-		// RssReaderFrameSettingが存在しない場合は初期化する
-		if (empty($rssReaderFrameData)) {
-			$rssReaderFrameData =
-				$this->RssReaderFrameSetting->createRssReaderFrameSetting($this->viewVars['frameKey']);
-		}
-		$this->set('rssReaderFrameSettingData', $rssReaderFrameData);
-
-		return $this->render('RssReaders/view');
+/**
+ * edit
+ *
+ * @return void
+ */
+	public function edit() {
+//		return $this->render('RssReaders/form', false);
 	}
 
 /**
@@ -122,25 +126,15 @@ class RssReadersController extends RssReadersAppController {
  * @return void
  */
 	public function update_status() {
-		$saveData = $this->request->data;
-		$this->RssReader->save($saveData);
-
-		$params = array(
-			'name' => __d('net_commons', 'Successfully finished.')
-		);
-		$this->set(compact('params'));
-		$this->set('_serialize', 'params');
-
-		return $this->render(false);
-	}
-
-/**
- * form method
- *
- * @param int $frameId frames.id
- * @return CakeResponse A response object containing the rendered view.
- */
-	public function form($frameId = 0) {
-		return $this->render('RssReaders/form', false);
+//		$saveData = $this->request->data;
+//		$this->RssReader->save($saveData);
+//
+//		$params = array(
+//			'name' => __d('net_commons', 'Successfully finished.')
+//		);
+//		$this->set(compact('params'));
+//		$this->set('_serialize', 'params');
+//
+//		return $this->render(false);
 	}
 }

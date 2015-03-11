@@ -2,8 +2,8 @@
 /**
  * RssReaderFrameSetting Model
  *
- *
  * @author Kosuke Miura <k_miura@zenk.co.jp>
+ * @author Shohei Nakajima <nakajimashouhei@gmail.com>
  * @link http://www.netcommons.org NetCommons Project
  * @license http://www.netcommons.org/license.txt NetCommons License
  */
@@ -11,7 +11,11 @@
 App::uses('RssReadersAppModel', 'RssReaders.Model');
 
 /**
- * Summary for RssReaderFrameSetting Model
+ * RssReaderFrameSetting Model
+ *
+ * @author Kosuke Miura <k_miura@zenk.co.jp>
+ * @author Shohei Nakajima <nakajimashouhei@gmail.com>
+ * @package NetCommons\RssReaders\Model
  */
 class RssReaderFrameSetting extends RssReadersAppModel {
 

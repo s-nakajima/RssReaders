@@ -2,10 +2,12 @@
 /**
  * RssReader Model
  *
- * @property  RssReader $RssReader
- * @author    Kosuke Miura <k_miura@zenk.co.jp>
- * @link      http://www.netcommons.org NetCommons Project
- * @license   http://www.netcommons.org/license.txt NetCommons License
+ * @property RssReader $RssReader
+ *
+ * @author Kosuke Miura <k_miura@zenk.co.jp>
+ * @author Shohei Nakajima <nakajimashouhei@gmail.com>
+ * @link http://www.netcommons.org NetCommons Project
+ * @license http://www.netcommons.org/license.txt NetCommons License
  * @copyright Copyright 2014, NetCommons Project
  */
 
@@ -14,8 +16,9 @@ App::uses('RssReadersAppModel', 'RssReaders.Model');
 /**
  * RssReader Model
  *
- * @author  Kosuke Miura <k_miura@zenk.co.jp>
- * @package app\Plugin\RssReaders\Model
+ * @author Kosuke Miura <k_miura@zenk.co.jp>
+ * @author Shohei Nakajima <nakajimashouhei@gmail.com>
+ * @package NetCommons\RssReaders\Model
  */
 class RssReader extends RssReadersAppModel {
 
@@ -56,22 +59,22 @@ class RssReader extends RssReadersAppModel {
  * @return array $rssReader
  */
 	public function getContent($blockId, $editable = 0) {
-		$conditions = array(
-			'block_id' => $blockId
-		);
-		if (!$editable) {
-			$conditions['status'] = NetCommonsBlockComponent::STATUS_PUBLISHED;
-		}
-
-		$rssReader = $this->find(
-			'first',
-			array(
-				'conditions' => $conditions,
-				'order' => $this->name . '.id DESC'
-			)
-		);
-
-		return $rssReader;
+//		$conditions = array(
+//			'block_id' => $blockId
+//		);
+//		if (!$editable) {
+//			$conditions['status'] = NetCommonsBlockComponent::STATUS_PUBLISHED;
+//		}
+//
+//		$rssReader = $this->find(
+//			'first',
+//			array(
+//				'conditions' => $conditions,
+//				'order' => $this->name . '.id DESC'
+//			)
+//		);
+//
+//		return $rssReader;
 	}
 
 /**
@@ -82,39 +85,39 @@ class RssReader extends RssReadersAppModel {
  * @return bool $result
  */
 	public function saveRssReader($data, $frameId) {
-		$data['Block']['name'] = $data[$this->name]['title'];
-
-		try {
-			// rssのデータをシリアライズして保存。
-			$url = $data[$this->name]['url'];
-			$data[$this->name]['serialize_value'] = $this->serializeRssData($url);
-		} catch (XmlException $e) {
-			// Xmlが取得できない場合異常終了
-			return false;
-		}
-
-		$result = $this->saveAll($data);
-
-		// 新規登録の場合は、Frames.block_idを更新する。
-		if ($result && !strlen($data[$this->name]['id'])) {
-			$rssReaderId = $this->getLastInsertID();
-			$rssReaderData = $this->findById($rssReaderId);
-			$blockId = $rssReaderData[$this->name]['block_id'];
-
-			$frameData = array(
-				'Frame' => array(
-					'id' => $frameId,
-					'block_id' => $blockId
-				)
-			);
-			$this->Frame = ClassRegistry::init('Frame');
-			$result = $this->Frame->save($frameData);
-			if ($result !== false) {
-				$result = true;
-			}
-		}
-
-		return $result;
+//		$data['Block']['name'] = $data[$this->name]['title'];
+//
+//		try {
+//			// rssのデータをシリアライズして保存。
+//			$url = $data[$this->name]['url'];
+//			$data[$this->name]['serialize_value'] = $this->serializeRssData($url);
+//		} catch (XmlException $e) {
+//			// Xmlが取得できない場合異常終了
+//			return false;
+//		}
+//
+//		$result = $this->saveAll($data);
+//
+//		// 新規登録の場合は、Frames.block_idを更新する。
+//		if ($result && !strlen($data[$this->name]['id'])) {
+//			$rssReaderId = $this->getLastInsertID();
+//			$rssReaderData = $this->findById($rssReaderId);
+//			$blockId = $rssReaderData[$this->name]['block_id'];
+//
+//			$frameData = array(
+//				'Frame' => array(
+//					'id' => $frameId,
+//					'block_id' => $blockId
+//				)
+//			);
+//			$this->Frame = ClassRegistry::init('Frame');
+//			$result = $this->Frame->save($frameData);
+//			if ($result !== false) {
+//				$result = true;
+//			}
+//		}
+//
+//		return $result;
 	}
 
 /**
@@ -124,21 +127,21 @@ class RssReader extends RssReadersAppModel {
  * @return string $serializeValue
  */
 	public function updateSerializeValue($rssReaderData) {
-		$cacheTime = $rssReaderData[$this->name]['cache_time'];
-		$modified = $rssReaderData[$this->name]['modified'];
-		$modifiedDate = new DateTime($modified);
-		$nowDate = new DateTime;
-		$interval = $nowDate->getTimeStamp() - $modifiedDate->getTimeStamp();
-
-		// 設定したキャッシュ時間を経過している場合は、RSSを再取得し更新する。
-		if ($interval > $cacheTime) {
-			$url = $rssReaderData[$this->name]['url'];
-			$rssReaderData[$this->name]['serialize_value'] = $this->serializeRssData($url);
-			$this->save($rssReaderData);
-		}
-		$serializeValue = $rssReaderData[$this->name]['serialize_value'];
-
-		return $serializeValue;
+//		$cacheTime = $rssReaderData[$this->name]['cache_time'];
+//		$modified = $rssReaderData[$this->name]['modified'];
+//		$modifiedDate = new DateTime($modified);
+//		$nowDate = new DateTime;
+//		$interval = $nowDate->getTimeStamp() - $modifiedDate->getTimeStamp();
+//
+//		// 設定したキャッシュ時間を経過している場合は、RSSを再取得し更新する。
+//		if ($interval > $cacheTime) {
+//			$url = $rssReaderData[$this->name]['url'];
+//			$rssReaderData[$this->name]['serialize_value'] = $this->serializeRssData($url);
+//			$this->save($rssReaderData);
+//		}
+//		$serializeValue = $rssReaderData[$this->name]['serialize_value'];
+//
+//		return $serializeValue;
 	}
 
 /**
@@ -148,9 +151,9 @@ class RssReader extends RssReadersAppModel {
  * @return string $serializeValue
  */
 	public function serializeRssData($url) {
-		$xmlData = Xml::toArray(Xml::build($url));
-		$serializeValue = serialize($xmlData);
-
-		return $serializeValue;
+//		$xmlData = Xml::toArray(Xml::build($url));
+//		$serializeValue = serialize($xmlData);
+//
+//		return $serializeValue;
 	}
 }
