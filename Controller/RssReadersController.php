@@ -78,6 +78,8 @@ class RssReadersController extends RssReadersAppController {
  * @return void
  */
 	public function view() {
+
+		
 //		// Frameのデータをviewにセット
 //		if (!$this->NetCommonsFrame->setView($this, $frameId)) {
 //			throw new ForbiddenException('NetCommonsFrame');
