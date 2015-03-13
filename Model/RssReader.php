@@ -23,18 +23,20 @@ App::uses('RssReadersAppModel', 'RssReaders.Model');
 class RssReader extends RssReadersAppModel {
 
 /**
+ * use behaviors
+ *
+ * @var array
+ */
+	public $actsAs = array(
+		'NetCommons.Publishable'
+	);
+
+/**
  * Validation rules
  *
  * @var array
  */
-	public $validate = array(
-		'link' => array(
-			'numeric' => array(
-				'rule' => 'url',
-				'message' => 'Invalid request.'
-			)
-		)
-	);
+	public $validate = array();
 
 /**
  * belongsTo associations
@@ -52,6 +54,48 @@ class RssReader extends RssReadersAppModel {
 	);
 
 /**
+ * Called during validation operations, before validation. Please note that custom
+ * validation rules can be defined in $validate.
+ *
+ * @param array $options Options passed from Model::save().
+ * @return bool True if validate operation should continue, false to abort
+ * @link http://book.cakephp.org/2.0/en/models/callback-methods.html#beforevalidate
+ * @see Model::save()
+ */
+	public function beforeValidate($options = array()) {
+		$this->validate = Hash::merge($this->validate, array(
+			'block_id' => array(
+				'numeric' => array(
+					'rule' => array('numeric'),
+					'message' => __d('net_commons', 'Invalid request.'),
+					'allowEmpty' => false,
+					'required' => true,
+				)
+			),
+			'key' => array(
+				'notEmpty' => array(
+					'rule' => array('notEmpty'),
+					'message' => __d('net_commons', 'Invalid request.'),
+					'required' => true,
+				)
+			),
+
+			//status to set in PublishableBehavior.
+
+			'link' => array(
+				'url' => array(
+					'rule' => 'url',
+					'message' => __d('net_commons', 'Invalid request.'),
+					'allowEmpty' => false,
+					'required' => true,
+				)
+			),
+		));
+
+		return parent::beforeValidate($options);
+	}
+
+/**
  * Get rss reader
  *
  * @param int $blockId blocks.id
@@ -59,6 +103,20 @@ class RssReader extends RssReadersAppModel {
  * @return array $rssReader
  */
 	public function getRssReader($blockId, $contentEditable) {
+		$conditions = array(
+			'block_id' => $blockId,
+		);
+		if (! $contentEditable) {
+			$conditions['status'] = NetCommonsBlockComponent::STATUS_PUBLISHED;
+		}
+
+		$rssReader = $this->find('first', array(
+			'recursive' => -1,
+			'conditions' => $conditions,
+			'order' => 'Announcement.id DESC',
+		));
+
+		return $rssReader;
 
 
 
