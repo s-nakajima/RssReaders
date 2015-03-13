@@ -11,7 +11,7 @@
  * @copyright Copyright 2014, NetCommons Project
  */
 
-App::uses('Xml', 'Utility');
+//App::uses('Xml', 'Utility');
 App::uses('RssReadersAppController', 'RssReaders.Controller');
 
 /**
@@ -29,7 +29,6 @@ class RssReadersController extends RssReadersAppController {
  * @var    array
  */
 	public $uses = array(
-		//'Frames.Frame',
 		'Comments.Comment',
 		'RssReaders.RssReader',
 		'RssReaders.RssReaderFrameSetting'
@@ -41,7 +40,6 @@ class RssReadersController extends RssReadersAppController {
  * @var array
  */
 	public $components = array(
-		//'NetCommons.NetCommonsBlock',
 		'NetCommons.NetCommonsFrame',
 		'NetCommons.NetCommonsWorkflow',
 		'NetCommons.NetCommonsRoomRole' => array(
@@ -78,39 +76,22 @@ class RssReadersController extends RssReadersAppController {
  * @return void
  */
 	public function view() {
+		$this->__initRssReader();
 
-		
-//		// Frameのデータをviewにセット
-//		if (!$this->NetCommonsFrame->setView($this, $frameId)) {
-//			throw new ForbiddenException('NetCommonsFrame');
-//		}
-//
-//		// RssReaderの取得
-//		$rssReaderData = $this->RssReader->getContent(
-//			$this->viewVars['blockId'],
-//			$this->viewVars['contentEditable']
-//		);
-//
-//		$rssXmlData = array();
-//		if (!empty($rssReaderData)) {
-//			// シリアライズされているRSSのデータを配列に戻す
-//			$rssSerializeData = $this->RssReader->updateSerializeValue($rssReaderData);
-//			$rssXmlData = unserialize($rssSerializeData);
-//		}
-//		$this->set('rssReaderData', $rssReaderData);
-//		$this->set('rssXmlData', $rssXmlData);
-//
-//		// RssReaderFrameSettingの取得
-//		$rssReaderFrameData =
-//			$this->RssReaderFrameSetting->getRssReaderFrameSetting($this->viewVars['frameKey']);
-//		// RssReaderFrameSettingが存在しない場合は初期化する
-//		if (empty($rssReaderFrameData)) {
-//			$rssReaderFrameData =
-//				$this->RssReaderFrameSetting->createRssReaderFrameSetting($this->viewVars['frameKey']);
-//		}
-//		$this->set('rssReaderFrameSettingData', $rssReaderFrameData);
-//
-//		return $this->render('RssReaders/view');
+		if ($this->request->is('ajax')) {
+			$tokenFields = Hash::flatten($this->request->data);
+			$hiddenFields = array(
+				'RssReader.block_id',
+				'RssReader.key'
+			);
+			$this->set('tokenFields', $tokenFields);
+			$this->set('hiddenFields', $hiddenFields);
+			$this->renderJson();
+		} else {
+			if ($this->viewVars['contentEditable']) {
+				$this->view = 'RssReader/viewForEditor';
+			}
+		}
 	}
 
 /**
@@ -123,20 +104,31 @@ class RssReadersController extends RssReadersAppController {
 	}
 
 /**
- * update RssReader status
+ * __initRssReader method
  *
  * @return void
  */
-	public function update_status() {
-//		$saveData = $this->request->data;
-//		$this->RssReader->save($saveData);
-//
-//		$params = array(
-//			'name' => __d('net_commons', 'Successfully finished.')
-//		);
-//		$this->set(compact('params'));
-//		$this->set('_serialize', 'params');
-//
-//		return $this->render(false);
+	private function __initRssReader() {
+		if (!$rssReader = $this->RssReader->getRssReader(
+			$this->viewVars['blockId'],
+			$this->viewVars['contentEditable']
+		)) {
+			$rssReader = $this->RssReader->create();
+		}
+		$comments = $this->Comment->getComments(
+			array(
+				'plugin_key' => 'rss_readers',
+				'content_key' => isset($rssReader['RssReader']['key']) ? $rssReader['RssReader']['key'] : null,
+			)
+		);
+
+		$results = array(
+			'rssReader' => $rssReader['RssReader'],
+			'comments' => $comments,
+			'contentStatus' => $rssReader['RssReader']['status'],
+		);
+		$results = $this->camelizeKeyRecursive($results);
+		$this->set($results);
 	}
+
 }

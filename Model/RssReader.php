@@ -113,29 +113,10 @@ class RssReader extends RssReadersAppModel {
 		$rssReader = $this->find('first', array(
 			'recursive' => -1,
 			'conditions' => $conditions,
-			'order' => 'Announcement.id DESC',
+			'order' => 'RssReader.id DESC',
 		));
 
 		return $rssReader;
-
-
-
-//		$conditions = array(
-//			'block_id' => $blockId
-//		);
-//		if (!$editable) {
-//			$conditions['status'] = NetCommonsBlockComponent::STATUS_PUBLISHED;
-//		}
-//
-//		$rssReader = $this->find(
-//			'first',
-//			array(
-//				'conditions' => $conditions,
-//				'order' => $this->name . '.id DESC'
-//			)
-//		);
-//
-//		return $rssReader;
 	}
 
 /**

@@ -9,4 +9,6 @@
  * @copyright Copyright 2014, NetCommons Project
  */
 ?>
-aaa
+
+<?php echo $this->element('RssReaders/view_site_info'); ?>
+
