@@ -1,6 +1,6 @@
 <?php
 /**
- * RssReaders view template
+ * RssReaders view for editor template
  *
  * @author Noriko Arai <arai@nii.ac.jp>
  * @author Shohei Nakajima <nakajimashouhei@gmail.com>
@@ -10,26 +10,30 @@
  */
 ?>
 
-<div class="row">
-	<div class="col-xs-6">
-		
+<?php echo $this->Html->script('/rss_readers/js/rss_readers.js', false); ?>
+
+<div id="nc-rss-readers-<?php echo (int)$frameId; ?>"
+		ng-controller="RssReaders"
+		ng-init="initialize(<?php echo h(json_encode(['frameId' => $frameId])); ?>)">
+
+	<div class="row">
+		<div class="col-xs-10">
+			<?php echo $this->element('RssReaders/view_site_info'); ?>
+		</div>
+
+		<div class="col-xs-2 text-right">
+			<span class="nc-tooltip" tooltip="<?php echo __d('net_commons', 'Edit'); ?>">
+				<a href="<?php echo $this->Html->url('/rss_readers/rss_readers/edit/' . $frameId) ?>" class="btn btn-primary">
+					<span class="glyphicon glyphicon-edit"> </span>
+				</a>
+			</span>
+			<span>
+				<a href="<?php echo $this->Html->url('/rss_readers/frame_settings/edit/' . $frameId) ?>" class="btn btn-default">
+					<span class="glyphicon glyphicon-cog"> </span>
+				</a>
+			</span>
+		</div>
 	</div>
 
-	<div class="col-xs-6 text-right">
-		<span class="nc-tooltip" tooltip="<?php echo __d('rss_readers', 'Site Info'); ?>">
-			<a href="" class="btn btn-default">
-				<span class="glyphicon glyphicon-info-sign"> </span>
-			</a>
-		</span>
-
-		<span class="nc-tooltip" tooltip="<?php echo __d('net_commons', 'Edit'); ?>">
-			<a href="<?php echo $this->Html->url('/rss_readers/rss_readers/edit/' . $frameId) ?>" class="btn btn-primary">
-				<span class="glyphicon glyphicon-edit"> </span>
-			</a>
-		</span>
-	</div>
+	<?php echo $this->element('RssReaders/view_items'); ?>
 </div>
-
-
-
-		<?php //echo $this->element('RssReaders/view_site_info'); ?>

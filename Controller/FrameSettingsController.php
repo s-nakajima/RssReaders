@@ -1,6 +1,6 @@
 <?php
 /**
- * RssReaderFrameSettings Controller
+ * FrameSettings Controller
  *
  * @property RssReaderFrameSetting $RssReaderFrameSetting
  *
@@ -14,7 +14,7 @@
 App::uses('RssReadersAppController', 'RssReaders.Controller');
 
 /**
- * RssReaderFrameSettings Controller
+ * FrameSettings Controller
  *
  * @author Kosuke Miura <k_miura@zenk.co.jp>
  * @author Shohei Nakajima <nakajimashouhei@gmail.com>
@@ -27,102 +27,86 @@ class FrameSettingsController extends RssReadersAppController {
  *
  * @var    array
  */
-//	public $uses = array(
-//		'Frames.Frame',
-//		'RssReaders.RssReaderFrameSetting'
-//	);
+	public $uses = array(
+		'RssReaders.RssReader',
+		'RssReaders.RssReaderFrameSetting'
+	);
 
 /**
  * use component
  *
  * @var array
  */
-//	public $components = array(
-//		'NetCommons.NetCommonsFrame',
-//		'NetCommons.NetCommonsRoomRole'
-//	);
+	public $components = array(
+		'NetCommons.NetCommonsFrame',
+		'NetCommons.NetCommonsWorkflow',
+		'NetCommons.NetCommonsRoomRole' => array(
+			//コンテンツの権限設定
+			'allowedActions' => array(
+				'contentEditable' => array('edit')
+			),
+		),
+	);
 
 /**
- * beforeFilter
+ * edit action
  *
- * @throws ForbiddenException
  * @return void
  */
-//	public function beforeFilter() {
-//		parent::beforeFilter();
-//		$this->Auth->allow();
-//
-//		// Roleのデータをviewにセット
-//		if (!$this->NetCommonsRoomRole->setView($this)) {
-//			throw new ForbiddenException();
-//		}
-//	}
+	public function edit() {
+		$this->__initRssReaderFrameSetting();
+		if ($this->request->isGet()) {
+			CakeSession::write('backUrl', $this->request->referer());
+		}
 
-/**
- * view RssReaderFrameSetting
- *
- * @param int $frameId frames.id
- * @throws ForbiddenException
- * @return void
- */
-	public function view($frameId = 0) {
-//		// Frameのデータをviewにセット
-//		if (!$this->NetCommonsFrame->setView($this, $frameId)) {
-//			throw new ForbiddenException('NetCommonsFrame');
-//		}
-//
-//		// RssReaderFrameSettingの取得
-//		$rssReaderFrameData =
-//			$this->RssReaderFrameSetting->getRssReaderFrameSetting($this->viewVars['frameKey']);
-//		// RssReaderFrameSettingが存在しない場合は初期化する
-//		if (empty($rssReaderFrameData)) {
-//			$rssReaderFrameData =
-//				$this->RssReaderFrameSetting->createRssReaderFrameSetting($this->viewVars['frameKey']);
-//		}
-//		$this->set('rssReaderFrameSettingData', $rssReaderFrameData);
-//
-//		return $this->render('view', false);
+		if ($this->request->isPost()) {
+			$this->RssReaderFrameSetting->saveRssReaderFrameSetting($this->data);
+			if (! $this->handleValidationError($this->RssReaderFrameSetting->validationErrors)) {
+				return;
+			}
+			if (!$this->request->is('ajax')) {
+				$backUrl = CakeSession::read('backUrl');
+				CakeSession::delete('backUrl');
+				$this->redirect($backUrl);
+			}
+			return;
+		}
 	}
 
 /**
- * edit RssReaderFrameSetting
+ * __initRssReaderFrameSetting method
  *
- * @param int $frameId frames.id
- * @throws ForbiddenException
  * @return void
+ * @throws BadRequestException
  */
-	public function edit($frameId = 0) {
-//		// 更新処理
-//		$saveData = $this->request->data;
-//		$this->RssReaderFrameSetting->save($saveData);
-//		$params = array(
-//			'name' => __d('net_commons', 'Successfully finished.')
-//		);
-//		$this->set(compact('params'));
-//		$this->set('_serialize', 'params');
-//
-//		return $this->render(false);
-	}
+	private function __initRssReaderFrameSetting() {
+		if (! $this->RssReader->getRssReader(
+			$this->viewVars['blockId'],
+			$this->viewVars['contentEditable']
+		)) {
+			if ($this->request->is('ajax')) {
+				$this->renderJson(
+					['error' => ['validationErrors' => ['id' => __d('net_commons', 'Invalid request.')]]],
+					__d('net_commons', 'Bad Request'), 400
+				);
+				return;
+			} else {
+				throw new BadRequestException(__d('net_commons', 'Bad Request'));
+			}
+		}
 
-/**
- * form method
- *
- * @param int $frameId frames.id
- * @throws ForbiddenException
- * @return CakeResponse A response object containing the rendered view.
- */
-//	public function form($frameId = 0) {
-//		// Frameのデータをviewにセット。
-//		if (!$this->NetCommonsFrame->setView($this, $frameId)) {
-//			throw new ForbiddenException('NetCommonsFrame');
-//		}
-//
-//		// RssReaderFrameSettingの取得。
-//		$rssReaderFrameData =
-//			$this->RssReaderFrameSetting->getRssReaderFrameSetting($this->viewVars['frameKey']);
-//		$rssReaderFrameId = Hash::get($rssReaderFrameData, 'RssReaderFrameSetting.id');
-//		$this->set('rssReaderFrameId', $rssReaderFrameId);
-//
-//		return $this->render('RssReaderFrameSettings/form', false);
-//	}
+		if (! $rssFrameSetting = $this->RssReaderFrameSetting->find('first', array(
+			'recursive' => -1,
+			'conditions' => array(
+				'frame_key' => $this->viewVars['frameKey']
+			)
+		))) {
+			$rssFrameSetting = $this->RssReaderFrameSetting->create(
+				['frame_key' => $this->viewVars['frameKey']]
+			);
+		}
+
+		$results = $this->camelizeKeyRecursive($rssFrameSetting);
+		$this->set($results);
+	}
 }

@@ -10,5 +10,14 @@
  */
 ?>
 
-<?php echo $this->element('RssReaders/view_site_info'); ?>
+<?php echo $this->Html->script('/rss_readers/js/rss_readers.js', false); ?>
+
+<div id="nc-rss-readers-<?php echo (int)$frameId; ?>"
+		ng-controller="RssReaders"
+		ng-init="initialize(<?php echo h(json_encode(['frameId' => $frameId])); ?>)">
+
+	<?php echo $this->element('RssReaders/view_site_info'); ?>
+
+	<?php echo $this->element('RssReaders/view_items'); ?>
+</div>
 
